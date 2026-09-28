@@ -1,0 +1,14 @@
+{
+  "name": "calculadora-selic-bolsa",
+  "version": "1.0.0",
+  "description": "Compara o rendimento da taxa Selic com o de uma ação da B3 em um intervalo de tempo.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "start": "node scripts/dev-server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

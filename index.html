@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Selic vs Bolsa</title>
+  <meta name="description" content="Compare o rendimento da taxa Selic com o de uma ação da B3, com aplicação inicial e aportes mensais.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232a78d6'/><path d='M7 22l6-6 4 4 8-9' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <main class="container">
+    <header class="cabecalho">
+      <h1>Selic vs Bolsa</h1>
+      <p class="subtitulo">Quanto você teria hoje investindo na Selic ou em uma ação, com o mesmo aporte todo mês?</p>
+    </header>
+
+    <form id="form" class="painel formulario" novalidate>
+      <div class="campo">
+        <label for="ticker">Ação</label>
+        <input id="ticker" name="ticker" list="acoes" value="PETR4" autocomplete="off"
+               spellcheck="false" required placeholder="Ex.: PETR4">
+        <datalist id="acoes"></datalist>
+      </div>
+
+      <fieldset class="campo">
+        <legend>Período</legend>
+        <div class="segmentado">
+          <input type="radio" name="anos" id="anos1" value="1"><label for="anos1">1 ano</label>
+          <input type="radio" name="anos" id="anos2" value="2"><label for="anos2">2 anos</label>
+          <input type="radio" name="anos" id="anos5" value="5" checked><label for="anos5">5 anos</label>
+          <input type="radio" name="anos" id="anos10" value="10"><label for="anos10">10 anos</label>
+        </div>
+      </fieldset>
+
+      <div class="campo">
+        <label for="inicial">Aplicação inicial</label>
+        <div class="moeda"><span>R$</span><input id="inicial" name="inicial" type="number" min="0" step="0.01" value="10000.00" inputmode="decimal"></div>
+      </div>
+
+      <div class="campo">
+        <label for="aporte">Aporte mensal</label>
+        <div class="moeda"><span>R$</span><input id="aporte" name="aporte" type="number" min="0" step="0.01" value="500.00" inputmode="decimal"></div>
+      </div>
+
+      <label class="checkbox">
+        <input type="checkbox" id="ir" name="ir" checked> Descontar Imposto de Renda
+      </label>
+
+      <button type="submit" id="botao">Comparar</button>
+    </form>
+
+    <p id="erro" class="erro" role="alert" hidden></p>
+
+    <section id="resultado" hidden aria-live="polite">
+      <p id="aviso" class="aviso" hidden></p>
+
+      <div class="investido painel">
+        <span class="rotulo">Total investido</span>
+        <strong id="totalInvestido" class="valor-grande"></strong>
+        <span id="detalheInvestido" class="detalhe"></span>
+      </div>
+
+      <div class="cards">
+        <article class="painel card" data-serie="acao">
+          <header><span class="marcador"></span><h2 id="tituloAcao">Ação</h2><span class="selo" hidden>Melhor</span></header>
+          <span class="rotulo">Rendimento líquido</span>
+          <strong class="valor-grande" data-campo="rendimento"></strong>
+          <span class="detalhe" data-campo="rentabilidade"></span>
+          <dl>
+            <dt>Valor bruto</dt><dd data-campo="bruto"></dd>
+            <dt>Imposto de Renda</dt><dd data-campo="ir"></dd>
+            <dt>Valor líquido</dt><dd data-campo="liquido"></dd>
+          </dl>
+        </article>
+
+        <article class="painel card" data-serie="selic">
+          <header><span class="marcador"></span><h2>Selic</h2><span class="selo" hidden>Melhor</span></header>
+          <span class="rotulo">Rendimento líquido</span>
+          <strong class="valor-grande" data-campo="rendimento"></strong>
+          <span class="detalhe" data-campo="rentabilidade"></span>
+          <dl>
+            <dt>Valor bruto</dt><dd data-campo="bruto"></dd>
+            <dt>Imposto de Renda</dt><dd data-campo="ir"></dd>
+            <dt>Valor líquido</dt><dd data-campo="liquido"></dd>
+          </dl>
+        </article>
+      </div>
+
+      <div class="painel">
+        <h2 class="titulo-grafico">Evolução do patrimônio (bruto)</h2>
+        <div class="legenda">
+          <span><i class="linha acao"></i><span id="legendaAcao">Ação</span></span>
+          <span><i class="linha selic"></i>Selic</span>
+          <span><i class="linha investido"></i>Total investido</span>
+        </div>
+        <div class="grafico"><canvas id="grafico" aria-label="Gráfico da evolução do patrimônio" role="img"></canvas></div>
+        <details class="tabela">
+          <summary>Ver dados em tabela</summary>
+          <div class="rolagem"><table id="tabela"></table></div>
+        </details>
+      </div>
+    </section>
+
+    <footer class="notas">
+      <p><strong>Premissas.</strong> Aplicação inicial no primeiro mês e aportes no fechamento de cada mês seguinte.
+        Cotações mensais ajustadas por proventos e desdobramentos (dividendos reinvestidos), via Yahoo Finance.
+        Selic acumulada no mês (série 4390 do Banco Central), como em um título pós-fixado que rende 100% da Selic.</p>
+      <p><strong>IR.</strong> Ações: 15% sobre o ganho no resgate (sem considerar a isenção para vendas até R$ 20 mil/mês).
+        Selic: tabela regressiva (22,5% a 15%) aplicada a cada aporte conforme o prazo. Não considera taxas de corretagem, custódia ou IOF.</p>
+      <p>Simulação educacional. Rentabilidade passada não garante rentabilidade futura.</p>
+    </footer>
+  </main>
+</body>
+</html>
